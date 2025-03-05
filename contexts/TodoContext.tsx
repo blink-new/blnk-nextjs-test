@@ -87,9 +87,9 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
               ...todo, 
               completed: !todo.completed,
               // If marking as complete, also complete all subtasks
-              subtasks: todo.completed 
-                ? todo.subtasks 
-                : todo.subtasks.map(st => ({ ...st, completed: true }))
+              subtasks: !todo.completed 
+                ? todo.subtasks.map(st => ({ ...st, completed: true }))
+                : todo.subtasks
             } 
           : todo
       )
@@ -153,13 +153,13 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
                   ? { ...subtask, completed: !subtask.completed }
                   : subtask
               ),
-              // If all subtasks are completed, mark the todo as completed
-              completed: todo.subtasks.every(
-                subtask => 
-                  (subtask.id === subtaskId 
+              // Update todo completed status based on subtasks
+              completed: todo.subtasks.length > 0 && 
+                todo.subtasks.every(subtask => 
+                  subtask.id === subtaskId 
                     ? !subtask.completed 
-                    : subtask.completed)
-              ) && todo.subtasks.length > 0
+                    : subtask.completed
+                )
             }
           : todo
       )

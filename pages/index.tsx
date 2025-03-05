@@ -1,5 +1,5 @@
 import { TodoProvider } from '@/contexts/TodoContext';
-import { TodoInput } from '@/components/TodoInput';
+import { AddTaskModal } from '@/components/AddTaskModal';
 import { TodoFilter } from '@/components/TodoFilter';
 import { TodoList } from '@/components/TodoList';
 import { TodoStats } from '@/components/TodoStats';
@@ -37,7 +37,9 @@ export default function Home() {
         </header>
         
         <TodoProvider>
-          <TodoInput />
+          <div className="flex justify-end mb-6">
+            <AddTaskModal />
+          </div>
           <TodoStats />
           <TodoFilter />
           <TodoList />

@@ -28,12 +28,15 @@ export function SubtaskItem({ subtask, todoId }: SubtaskItemProps) {
   };
 
   const handleSave = () => {
-    editSubtask(todoId, subtask.id, editText);
-    setIsEditing(false);
+    if (editText.trim()) {
+      editSubtask(todoId, subtask.id, editText);
+      setIsEditing(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
       handleSave();
     } else if (e.key === 'Escape') {
       setEditText(subtask.text);

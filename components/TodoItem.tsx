@@ -108,20 +108,19 @@ export function TodoItem({ todo }: TodoItemProps) {
                 {todo.text}
               </span>
               
-              {(hasDescription || hasSubtasks) && (
+              {/* Always show description as subtitle if it exists */}
+              {hasDescription && (
+                <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
+                  {todo.description}
+                </p>
+              )}
+              
+              {/* Show subtask count if there are subtasks */}
+              {hasSubtasks && (
                 <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                  {hasDescription && (
-                    <span className="flex items-center gap-1">
-                      <AlignLeft size={12} />
-                      Description
-                    </span>
-                  )}
-                  
-                  {hasSubtasks && (
-                    <span className="flex items-center gap-1">
-                      {completedSubtasks}/{totalSubtasks} subtasks
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1">
+                    {completedSubtasks}/{totalSubtasks} subtasks
+                  </span>
                 </div>
               )}
             </div>
@@ -129,7 +128,7 @@ export function TodoItem({ todo }: TodoItemProps) {
         </div>
         
         <div className="flex items-center gap-1">
-          {!isEditing && (hasDescription || hasSubtasks || todo.subtasks.length > 0) && (
+          {!isEditing && (hasDescription || hasSubtasks) && (
             <Button
               variant="ghost"
               size="icon"
@@ -171,9 +170,12 @@ export function TodoItem({ todo }: TodoItemProps) {
             </div>
           )}
           
-          {hasSubtasks && (
-            <div className="pl-7 space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground mb-1">Subtasks</h4>
+          {/* Subtasks section */}
+          <div className="pl-7 space-y-2">
+            <h4 className="text-xs font-medium text-muted-foreground mb-1">
+              {hasSubtasks ? 'Subtasks' : 'Add Subtasks'}
+            </h4>
+            {hasSubtasks && (
               <div className="space-y-1">
                 {todo.subtasks.map(subtask => (
                   <SubtaskItem 
@@ -183,28 +185,28 @@ export function TodoItem({ todo }: TodoItemProps) {
                   />
                 ))}
               </div>
-            </div>
-          )}
-          
-          <form onSubmit={handleAddSubtask} className="pl-7 flex gap-2 mt-2">
-            <input
-              type="text"
-              value={newSubtask}
-              onChange={(e) => setNewSubtask(e.target.value)}
-              placeholder="Add a subtask..."
-              className="flex-1 text-sm bg-transparent border-b border-border focus:border-primary outline-none py-1"
-            />
-            <Button 
-              type="submit" 
-              size="sm" 
-              variant="ghost"
-              className="h-7 px-2 text-xs"
-              disabled={!newSubtask.trim()}
-            >
-              <Plus size={14} className="mr-1" />
-              Add
-            </Button>
-          </form>
+            )}
+            
+            <form onSubmit={handleAddSubtask} className="flex gap-2 mt-2">
+              <input
+                type="text"
+                value={newSubtask}
+                onChange={(e) => setNewSubtask(e.target.value)}
+                placeholder="Add a subtask..."
+                className="flex-1 text-sm bg-transparent border-b border-border focus:border-primary outline-none py-1"
+              />
+              <Button 
+                type="submit" 
+                size="sm" 
+                variant="ghost"
+                className="h-7 px-2 text-xs"
+                disabled={!newSubtask.trim()}
+              >
+                <Plus size={14} className="mr-1" />
+                Add
+              </Button>
+            </form>
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </div>

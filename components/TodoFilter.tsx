@@ -12,7 +12,7 @@ export function TodoFilter() {
         size="sm"
         onClick={() => setFilter('all')}
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 border-border",
           filter === 'all' && "bg-primary text-primary-foreground hover:bg-primary/90"
         )}
       >
@@ -23,7 +23,7 @@ export function TodoFilter() {
         size="sm"
         onClick={() => setFilter('active')}
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 border-border",
           filter === 'active' && "bg-primary text-primary-foreground hover:bg-primary/90"
         )}
       >
@@ -34,7 +34,7 @@ export function TodoFilter() {
         size="sm"
         onClick={() => setFilter('completed')}
         className={cn(
-          "transition-all duration-300",
+          "transition-all duration-300 border-border",
           filter === 'completed' && "bg-primary text-primary-foreground hover:bg-primary/90"
         )}
       >

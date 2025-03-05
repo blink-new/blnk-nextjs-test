@@ -43,8 +43,8 @@ export function TodoItem({ todo }: TodoItemProps) {
   return (
     <div 
       className={cn(
-        "group flex items-center justify-between p-4 rounded-lg transition-all duration-300",
-        "hover:bg-secondary/50",
+        "group flex items-center justify-between p-4 border-b border-border last:border-0",
+        "transition-all duration-300 hover:bg-secondary/40",
         todo.completed && "opacity-70"
       )}
     >
@@ -52,7 +52,7 @@ export function TodoItem({ todo }: TodoItemProps) {
         <Checkbox 
           checked={todo.completed}
           onCheckedChange={() => toggleTodo(todo.id)}
-          className="transition-all duration-300 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+          className="transition-all duration-300 data-[state=checked]:bg-success data-[state=checked]:border-success"
         />
         
         {isEditing ? (
@@ -63,7 +63,7 @@ export function TodoItem({ todo }: TodoItemProps) {
             onChange={(e) => setEditText(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKeyDown}
-            className="flex-1 bg-background border-b-2 border-primary/30 focus:border-primary outline-none px-1 py-0.5"
+            className="flex-1 bg-transparent border-b-2 border-primary/30 focus:border-primary outline-none px-1 py-0.5"
             autoFocus
           />
         ) : (

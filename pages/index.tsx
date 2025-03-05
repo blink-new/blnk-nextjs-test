@@ -21,7 +21,7 @@ const geistMono = localFont({
 export default function Home() {
   return (
     <div
-      className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-b from-background to-secondary/20 font-[family-name:var(--font-geist-sans)]`}
+      className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 font-[family-name:var(--font-geist-sans)]`}
     >
       <div className="container max-w-2xl mx-auto p-6 py-12">
         <div className="flex justify-end mb-4">

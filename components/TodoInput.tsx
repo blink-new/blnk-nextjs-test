@@ -23,11 +23,11 @@ export function TodoInput() {
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Add a new task..."
-        className="flex-1 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="flex-1 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 border-border"
       />
       <Button 
         type="submit" 
-        className="bg-primary hover:bg-primary/90 transition-all duration-300"
+        className="transition-all duration-300"
       >
         <PlusCircle size={18} className="mr-2" />
         Add

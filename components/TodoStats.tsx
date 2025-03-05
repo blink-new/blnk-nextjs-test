@@ -16,7 +16,11 @@ export function TodoStats() {
         <span>Progress</span>
         <span>{completed} of {total} tasks completed ({percentage}%)</span>
       </div>
-      <Progress value={percentage} className="h-2" />
+      <Progress 
+        value={percentage} 
+        className="h-2" 
+        indicatorClassName={percentage === 100 ? "bg-success" : ""}
+      />
     </div>
   );
 }

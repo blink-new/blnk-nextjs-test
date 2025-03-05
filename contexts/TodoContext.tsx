@@ -1,18 +1,30 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export interface Todo {
+export interface SubTask {
   id: string;
   text: string;
   completed: boolean;
+}
+
+export interface Todo {
+  id: string;
+  text: string;
+  description: string;
+  completed: boolean;
   createdAt: Date;
+  subtasks: SubTask[];
 }
 
 type TodoContextType = {
   todos: Todo[];
-  addTodo: (text: string) => void;
+  addTodo: (text: string, description?: string) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
-  editTodo: (id: string, text: string) => void;
+  editTodo: (id: string, text: string, description?: string) => void;
+  addSubtask: (todoId: string, text: string) => void;
+  toggleSubtask: (todoId: string, subtaskId: string) => void;
+  deleteSubtask: (todoId: string, subtaskId: string) => void;
+  editSubtask: (todoId: string, subtaskId: string, text: string) => void;
   filter: 'all' | 'active' | 'completed';
   setFilter: (filter: 'all' | 'active' | 'completed') => void;
   filteredTodos: Todo[];
@@ -33,7 +45,9 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Convert string dates back to Date objects
         const todosWithDates = parsedTodos.map((todo: any) => ({
           ...todo,
-          createdAt: new Date(todo.createdAt)
+          createdAt: new Date(todo.createdAt),
+          // Ensure subtasks array exists for backward compatibility
+          subtasks: todo.subtasks || []
         }));
         setTodos(todosWithDates);
       } catch (error) {
@@ -48,15 +62,17 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [todos]);
 
   // Add a new todo
-  const addTodo = (text: string) => {
+  const addTodo = (text: string, description: string = '') => {
     if (text.trim()) {
       setTodos([
         ...todos,
         {
           id: crypto.randomUUID(),
           text: text.trim(),
+          description: description.trim(),
           completed: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+          subtasks: []
         }
       ]);
     }
@@ -66,7 +82,16 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleTodo = (id: string) => {
     setTodos(
       todos.map(todo =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        todo.id === id 
+          ? { 
+              ...todo, 
+              completed: !todo.completed,
+              // If marking as complete, also complete all subtasks
+              subtasks: todo.completed 
+                ? todo.subtasks 
+                : todo.subtasks.map(st => ({ ...st, completed: true }))
+            } 
+          : todo
       )
     );
   };
@@ -77,22 +102,119 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Edit a todo
-  const editTodo = (id: string, text: string) => {
+  const editTodo = (id: string, text: string, description?: string) => {
     if (text.trim()) {
       setTodos(
         todos.map(todo =>
-          todo.id === id ? { ...todo, text: text.trim() } : todo
+          todo.id === id 
+            ? { 
+                ...todo, 
+                text: text.trim(),
+                description: description !== undefined ? description.trim() : todo.description
+              } 
+            : todo
         )
       );
     }
   };
 
-  // Filter todos based on current filter
-  const filteredTodos = todos.filter(todo => {
-    if (filter === 'active') return !todo.completed;
-    if (filter === 'completed') return todo.completed;
-    return true; // 'all' filter
-  });
+  // Add a subtask to a todo
+  const addSubtask = (todoId: string, text: string) => {
+    if (text.trim()) {
+      setTodos(
+        todos.map(todo =>
+          todo.id === todoId
+            ? {
+                ...todo,
+                subtasks: [
+                  ...todo.subtasks,
+                  {
+                    id: crypto.randomUUID(),
+                    text: text.trim(),
+                    completed: false
+                  }
+                ]
+              }
+            : todo
+        )
+      );
+    }
+  };
+
+  // Toggle a subtask's completed status
+  const toggleSubtask = (todoId: string, subtaskId: string) => {
+    setTodos(
+      todos.map(todo =>
+        todo.id === todoId
+          ? {
+              ...todo,
+              subtasks: todo.subtasks.map(subtask =>
+                subtask.id === subtaskId
+                  ? { ...subtask, completed: !subtask.completed }
+                  : subtask
+              ),
+              // If all subtasks are completed, mark the todo as completed
+              completed: todo.subtasks.every(
+                subtask => 
+                  (subtask.id === subtaskId 
+                    ? !subtask.completed 
+                    : subtask.completed)
+              ) && todo.subtasks.length > 0
+            }
+          : todo
+      )
+    );
+  };
+
+  // Delete a subtask
+  const deleteSubtask = (todoId: string, subtaskId: string) => {
+    setTodos(
+      todos.map(todo =>
+        todo.id === todoId
+          ? {
+              ...todo,
+              subtasks: todo.subtasks.filter(subtask => subtask.id !== subtaskId)
+            }
+          : todo
+      )
+    );
+  };
+
+  // Edit a subtask
+  const editSubtask = (todoId: string, subtaskId: string, text: string) => {
+    if (text.trim()) {
+      setTodos(
+        todos.map(todo =>
+          todo.id === todoId
+            ? {
+                ...todo,
+                subtasks: todo.subtasks.map(subtask =>
+                  subtask.id === subtaskId
+                    ? { ...subtask, text: text.trim() }
+                    : subtask
+                )
+              }
+            : todo
+        )
+      );
+    }
+  };
+
+  // Filter and sort todos
+  const filteredTodos = todos
+    .filter(todo => {
+      if (filter === 'active') return !todo.completed;
+      if (filter === 'completed') return todo.completed;
+      return true; // 'all' filter
+    })
+    .sort((a, b) => {
+      // Sort by completion status first (incomplete first)
+      if (a.completed !== b.completed) {
+        return a.completed ? 1 : -1;
+      }
+      // Then sort by creation date (newest first)
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
 
   return (
     <TodoContext.Provider
@@ -102,6 +224,10 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleTodo,
         deleteTodo,
         editTodo,
+        addSubtask,
+        toggleSubtask,
+        deleteSubtask,
+        editSubtask,
         filter,
         setFilter,
         filteredTodos

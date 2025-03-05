@@ -35,7 +35,7 @@ export function TodoList() {
   return (
     <div className="space-y-4 animate-slide-in">
       {allCompleted && (
-        <div className="flex items-center justify-center gap-2 py-3 text-success bg-success/10 rounded-lg">
+        <div className="flex items-center justify-center gap-2 py-3 text-success-foreground bg-success rounded-lg">
           <CheckCircle2 size={18} />
           <span>All tasks completed!</span>
         </div>

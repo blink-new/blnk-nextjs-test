@@ -6,6 +6,7 @@ import { TodoStats } from '@/components/TodoStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import localFont from "next/font/local";
 import { CheckSquare } from 'lucide-react';
+import Head from 'next/head';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -20,31 +21,41 @@ const geistMono = localFont({
 
 export default function Home() {
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <div className="container max-w-2xl mx-auto p-6 py-12">
-        <div className="flex justify-end mb-4">
-          <ThemeToggle />
+    <>
+      <Head>
+        <title>TaskMaster | Stay Organized</title>
+        <meta name="description" content="A beautiful and functional todo app to help you stay organized and productive" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      
+      <div
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 font-[family-name:var(--font-geist-sans)]`}
+      >
+        <div className="container max-w-2xl mx-auto p-4 sm:p-6 py-8 sm:py-12">
+          <header className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center p-2 bg-primary/10 rounded-full">
+                <CheckSquare size={24} className="text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold">TaskMaster</h1>
+                <p className="text-sm text-muted-foreground">Stay organized and productive</p>
+              </div>
+            </div>
+            <ThemeToggle />
+          </header>
+          
+          <TodoProvider>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+              <TodoFilter />
+              <AddTaskModal />
+            </div>
+            <TodoStats />
+            <TodoList />
+          </TodoProvider>
         </div>
-        
-        <header className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center p-2 bg-primary/10 rounded-full mb-4">
-            <CheckSquare size={24} className="text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Todo App</h1>
-          <p className="text-muted-foreground">Stay organized and productive</p>
-        </header>
-        
-        <TodoProvider>
-          <div className="flex justify-end mb-6">
-            <AddTaskModal />
-          </div>
-          <TodoStats />
-          <TodoFilter />
-          <TodoList />
-        </TodoProvider>
       </div>
-    </div>
+    </>
   );
 }

@@ -15,9 +15,15 @@ export interface Todo {
   subtasks: SubTask[];
 }
 
+interface SubtaskInput {
+  id: string;
+  text: string;
+}
+
 type TodoContextType = {
   todos: Todo[];
   addTodo: (text: string, description?: string) => void;
+  addTodoWithSubtasks: (text: string, description: string, subtasks: SubtaskInput[]) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
   editTodo: (id: string, text: string, description?: string) => void;
@@ -73,6 +79,31 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
           completed: false,
           createdAt: new Date(),
           subtasks: []
+        }
+      ]);
+    }
+  };
+
+  // Add a new todo with subtasks
+  const addTodoWithSubtasks = (text: string, description: string, subtaskInputs: SubtaskInput[]) => {
+    if (text.trim()) {
+      const subtasks = subtaskInputs
+        .filter(st => st.text.trim())
+        .map(st => ({
+          id: st.id,
+          text: st.text.trim(),
+          completed: false
+        }));
+
+      setTodos([
+        ...todos,
+        {
+          id: crypto.randomUUID(),
+          text: text.trim(),
+          description: description.trim(),
+          completed: false,
+          createdAt: new Date(),
+          subtasks
         }
       ]);
     }
@@ -144,25 +175,27 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Toggle a subtask's completed status
   const toggleSubtask = (todoId: string, subtaskId: string) => {
     setTodos(
-      todos.map(todo =>
-        todo.id === todoId
-          ? {
-              ...todo,
-              subtasks: todo.subtasks.map(subtask =>
-                subtask.id === subtaskId
-                  ? { ...subtask, completed: !subtask.completed }
-                  : subtask
-              ),
-              // Update todo completed status based on subtasks
-              completed: todo.subtasks.length > 0 && 
-                todo.subtasks.every(subtask => 
-                  subtask.id === subtaskId 
-                    ? !subtask.completed 
-                    : subtask.completed
-                )
-            }
-          : todo
-      )
+      todos.map(todo => {
+        if (todo.id !== todoId) return todo;
+        
+        // Update the specific subtask
+        const updatedSubtasks = todo.subtasks.map(subtask =>
+          subtask.id === subtaskId
+            ? { ...subtask, completed: !subtask.completed }
+            : subtask
+        );
+        
+        // Check if all subtasks are now completed
+        const allSubtasksCompleted = updatedSubtasks.length > 0 && 
+          updatedSubtasks.every(subtask => subtask.completed);
+        
+        // If all subtasks are completed, mark the todo as completed
+        return {
+          ...todo,
+          subtasks: updatedSubtasks,
+          completed: allSubtasksCompleted
+        };
+      })
     );
   };
 
@@ -221,6 +254,7 @@ export const TodoProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         todos,
         addTodo,
+        addTodoWithSubtasks,
         toggleTodo,
         deleteTodo,
         editTodo,

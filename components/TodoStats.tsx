@@ -1,5 +1,6 @@
 import { useTodo } from '@/contexts/TodoContext';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 export function TodoStats() {
   const { todos } = useTodo();
@@ -11,10 +12,14 @@ export function TodoStats() {
   const percentage = Math.round((completed / total) * 100);
   
   return (
-    <div className="mb-6">
+    <div className="mb-6 bg-card border border-border rounded-lg p-4 shadow-sm">
       <div className="flex justify-between mb-2 text-sm">
-        <span>Progress</span>
-        <span>{completed} of {total} tasks completed ({percentage}%)</span>
+        <span className="font-medium">Progress</span>
+        <span className={cn(
+          percentage === 100 ? "text-success" : "text-muted-foreground"
+        )}>
+          {completed} of {total} tasks completed ({percentage}%)
+        </span>
       </div>
       <Progress 
         value={percentage} 

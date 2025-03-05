@@ -11,33 +11,66 @@ import {
   DialogFooter,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Plus, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface SubtaskInput {
+  id: string;
+  text: string;
+}
 
 export function AddTaskModal() {
-  const { addTodo } = useTodo();
+  const { addTodoWithSubtasks } = useTodo();
   const [text, setText] = useState('');
   const [description, setDescription] = useState('');
+  const [subtasks, setSubtasks] = useState<SubtaskInput[]>([]);
   const [open, setOpen] = useState(false);
+
+  const handleAddSubtask = () => {
+    setSubtasks([...subtasks, { id: crypto.randomUUID(), text: '' }]);
+  };
+
+  const handleSubtaskChange = (id: string, value: string) => {
+    setSubtasks(subtasks.map(st => st.id === id ? { ...st, text: value } : st));
+  };
+
+  const handleRemoveSubtask = (id: string) => {
+    setSubtasks(subtasks.filter(st => st.id !== id));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (text.trim()) {
-      addTodo(text, description);
-      setText('');
-      setDescription('');
+      // Filter out empty subtasks
+      const validSubtasks = subtasks.filter(st => st.text.trim() !== '');
+      addTodoWithSubtasks(text, description, validSubtasks);
+      resetForm();
       setOpen(false);
     }
   };
 
+  const resetForm = () => {
+    setText('');
+    setDescription('');
+    setSubtasks([]);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      resetForm();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="gap-2 transition-all duration-300">
           <PlusCircle size={18} />
           Add Task
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
@@ -68,6 +101,51 @@ export function AddTaskModal() {
                 placeholder="Add more details about this task..."
                 className="min-h-[100px] resize-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 border-border"
               />
+            </div>
+            
+            {/* Subtasks section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Subtasks</label>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleAddSubtask}
+                  className="h-8 px-2 text-xs"
+                >
+                  <Plus size={14} className="mr-1" />
+                  Add Subtask
+                </Button>
+              </div>
+              
+              {subtasks.length > 0 ? (
+                <div className="space-y-2">
+                  {subtasks.map((subtask, index) => (
+                    <div key={subtask.id} className="flex items-center gap-2">
+                      <Input
+                        value={subtask.text}
+                        onChange={(e) => handleSubtaskChange(subtask.id, e.target.value)}
+                        placeholder={`Subtask ${index + 1}`}
+                        className="flex-1 h-9 text-sm transition-all duration-300"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleRemoveSubtask(subtask.id)}
+                        className="h-9 w-9 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">
+                  No subtasks added yet
+                </p>
+              )}
             </div>
           </div>
           <DialogFooter>

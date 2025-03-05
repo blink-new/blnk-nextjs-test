@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Trash2, Edit2, Save, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface SubtaskItemProps {
   subtask: SubTask;
@@ -64,11 +65,25 @@ export function SubtaskItem({ subtask, todoId }: SubtaskItemProps) {
     >
       <div className="flex items-center gap-2 flex-1">
         {!isEditing && (
-          <Checkbox 
-            checked={subtask.completed}
-            onCheckedChange={() => toggleSubtask(todoId, subtask.id)}
-            className="h-3.5 w-3.5 transition-all duration-300"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Checkbox 
+                    checked={subtask.completed}
+                    onCheckedChange={() => toggleSubtask(todoId, subtask.id)}
+                    className={cn(
+                      "h-3.5 w-3.5 transition-all duration-300",
+                      subtask.completed && "bg-success border-success"
+                    )}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="start" className="text-xs">
+                {subtask.completed ? "Mark as incomplete" : "Mark as complete"}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         )}
         
         {isEditing ? (
@@ -95,41 +110,71 @@ export function SubtaskItem({ subtask, todoId }: SubtaskItemProps) {
       
       {isEditing ? (
         <div className="flex gap-1">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleSave}
-            className="h-6 w-6 text-muted-foreground hover:text-success"
-          >
-            <Save size={12} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleCancel}
-            className="h-6 w-6 text-muted-foreground hover:text-destructive"
-          >
-            <X size={12} />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleSave}
+                  className="h-6 w-6 text-muted-foreground hover:text-success"
+                >
+                  <Save size={12} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">Save changes</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleCancel}
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                >
+                  <X size={12} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">Cancel editing</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       ) : (
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleEdit}
-            className="h-6 w-6 text-muted-foreground hover:text-foreground"
-          >
-            <Edit2 size={12} />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => deleteSubtask(todoId, subtask.id)}
-            className="h-6 w-6 text-muted-foreground hover:text-destructive"
-          >
-            <Trash2 size={12} />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleEdit}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                >
+                  <Edit2 size={12} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">Edit subtask</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => deleteSubtask(todoId, subtask.id)}
+                  className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 size={12} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="left" className="text-xs">Delete subtask</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
     </div>

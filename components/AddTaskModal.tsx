@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { PlusCircle, Plus, Trash2 } from 'lucide-react';
+import { PlusCircle, Plus, Trash2, AlignLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SubtaskInput {
@@ -25,6 +25,7 @@ export function AddTaskModal() {
   const [description, setDescription] = useState('');
   const [subtasks, setSubtasks] = useState<SubtaskInput[]>([]);
   const [open, setOpen] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleAddSubtask = () => {
     setSubtasks([...subtasks, { id: crypto.randomUUID(), text: '' }]);
@@ -53,6 +54,7 @@ export function AddTaskModal() {
     setText('');
     setDescription('');
     setSubtasks([]);
+    setShowDescription(false);
   };
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -65,7 +67,7 @@ export function AddTaskModal() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button className="gap-2 transition-all duration-300">
+        <Button id="add-task-trigger" className="gap-2 transition-all duration-300">
           <PlusCircle size={18} />
           Add Task
         </Button>
@@ -90,18 +92,32 @@ export function AddTaskModal() {
                 autoFocus
               />
             </div>
-            <div className="space-y-2">
-              <label htmlFor="task-description" className="text-sm font-medium">
-                Description (optional)
-              </label>
-              <Textarea
-                id="task-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add more details about this task..."
-                className="min-h-[100px] resize-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 border-border"
-              />
-            </div>
+            
+            {showDescription ? (
+              <div className="space-y-2 animate-fade-in">
+                <label htmlFor="task-description" className="text-sm font-medium">
+                  Description (optional)
+                </label>
+                <Textarea
+                  id="task-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add more details about this task..."
+                  className="min-h-[100px] resize-none transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary/50 border-border"
+                />
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDescription(true)}
+                className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <AlignLeft size={16} />
+                Add Description
+              </Button>
+            )}
             
             {/* Subtasks section */}
             <div className="space-y-3">
@@ -120,7 +136,7 @@ export function AddTaskModal() {
               </div>
               
               {subtasks.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-2 animate-fade-in">
                   {subtasks.map((subtask, index) => (
                     <div key={subtask.id} className="flex items-center gap-2">
                       <Input
@@ -143,7 +159,7 @@ export function AddTaskModal() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground italic">
-                  No subtasks added yet
+                  Break down your task into smaller steps (optional)
                 </p>
               )}
             </div>

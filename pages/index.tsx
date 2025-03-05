@@ -5,8 +5,9 @@ import { TodoList } from '@/components/TodoList';
 import { TodoStats } from '@/components/TodoStats';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import localFont from "next/font/local";
-import { CheckSquare } from 'lucide-react';
+import { CheckSquare, Github } from 'lucide-react';
 import Head from 'next/head';
+import { Button } from '@/components/ui/button';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -43,7 +44,19 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">Stay organized and productive</p>
               </div>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="rounded-full"
+                asChild
+              >
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                  <Github size={18} />
+                </a>
+              </Button>
+              <ThemeToggle />
+            </div>
           </header>
           
           <TodoProvider>
@@ -54,6 +67,10 @@ export default function Home() {
             <TodoStats />
             <TodoList />
           </TodoProvider>
+          
+          <footer className="mt-12 text-center text-sm text-muted-foreground">
+            <p>TaskMaster &copy; {new Date().getFullYear()} - Organize your life with ease</p>
+          </footer>
         </div>
       </div>
     </>

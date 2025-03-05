@@ -9,13 +9,16 @@ import { Trash2,
   Plus,
   AlignLeft,
   Save,
-  X
+  X,
+  CheckCircle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { SubtaskItem } from '@/components/SubtaskItem';
+import { Badge } from './ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface TodoItemProps {
   todo: Todo;
@@ -80,23 +83,54 @@ export function TodoItem({ todo }: TodoItemProps) {
   const totalSubtasks = todo.subtasks.length;
   const hasSubtasks = totalSubtasks > 0;
   const hasDescription = todo.description.trim().length > 0;
+  const shouldShowExpand = hasDescription || hasSubtasks;
+
+  // Format the creation date
+  const formatDate = (date: Date) => {
+    const now = new Date();
+    const diffInDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffInDays === 0) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else if (diffInDays < 7) {
+      return `${diffInDays} days ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
 
   return (
     <div 
       className={cn(
         "group border-b border-border last:border-0",
-        "transition-all duration-300",
+        "transition-all duration-300 hover:bg-muted/30",
         todo.completed && "bg-muted/30"
       )}
     >
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3 flex-1">
           {!isEditing && (
-            <Checkbox 
-              checked={todo.completed}
-              onCheckedChange={() => toggleTodo(todo.id)}
-              className="transition-all duration-300"
-            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Checkbox 
+                      checked={todo.completed}
+                      onCheckedChange={() => toggleTodo(todo.id)}
+                      className={cn(
+                        "transition-all duration-300",
+                        todo.completed && "bg-success border-success"
+                      )}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {todo.completed ? "Mark as incomplete" : "Mark as complete"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           
           {isEditing ? (
@@ -114,30 +148,42 @@ export function TodoItem({ todo }: TodoItemProps) {
             </div>
           ) : (
             <div className="flex-1">
-              <span 
-                className={cn(
-                  "block transition-all duration-300 font-medium",
-                  todo.completed && "line-through text-muted-foreground"
+              <div className="flex items-center gap-2">
+                <span 
+                  className={cn(
+                    "block transition-all duration-300 font-medium",
+                    todo.completed && "line-through text-muted-foreground"
+                  )}
+                >
+                  {todo.text}
+                </span>
+                
+                {todo.completed && (
+                  <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-xs">
+                    <CheckCircle size={10} className="mr-1" />
+                    Completed
+                  </Badge>
                 )}
-              >
-                {todo.text}
-              </span>
+              </div>
               
-              {/* Always show description as subtitle if it exists */}
-              {hasDescription && (
-                <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
-                  {todo.description}
-                </p>
-              )}
-              
-              {/* Show subtask count if there are subtasks */}
-              {hasSubtasks && (
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                <span>{formatDate(todo.createdAt)}</span>
+                
+                {/* Show subtask count if there are subtasks */}
+                {hasSubtasks && (
                   <span className="flex items-center gap-1">
                     {completedSubtasks}/{totalSubtasks} subtasks
                   </span>
-                </div>
-              )}
+                )}
+                
+                {/* Show description indicator */}
+                {hasDescription && (
+                  <span className="flex items-center gap-1">
+                    <AlignLeft size={10} />
+                    Has description
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -145,53 +191,95 @@ export function TodoItem({ todo }: TodoItemProps) {
         <div className="flex items-center gap-1">
           {isEditing ? (
             <div className="flex gap-1">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleSave}
-                className="h-8 w-8 text-muted-foreground hover:text-success"
-              >
-                <Save size={16} />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={handleCancel}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              >
-                <X size={16} />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleSave}
+                      className="h-8 w-8 text-muted-foreground hover:text-success"
+                    >
+                      <Save size={16} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Save changes</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleCancel}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    >
+                      <X size={16} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Cancel editing</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           ) : (
             <>
-              {(hasDescription || hasSubtasks) && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                >
-                  {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </Button>
+              {shouldShowExpand && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {isExpanded ? "Collapse details" : "Expand details"}
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               )}
               
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleEdit}
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                >
-                  <Edit2 size={16} />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => deleteTodo(todo.id)}
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                >
-                  <Trash2 size={16} />
-                </Button>
+              <div className={cn(
+                "flex gap-1 transition-opacity duration-300",
+                shouldShowExpand ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+              )}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={handleEdit}
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        <Edit2 size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit task</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => deleteTodo(todo.id)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 size={16} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete task</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </>
           )}
@@ -199,7 +287,7 @@ export function TodoItem({ todo }: TodoItemProps) {
       </div>
 
       <Collapsible open={isExpanded || isEditing} onOpenChange={setIsExpanded}>
-        <CollapsibleContent className="px-4 pb-4 pt-0 space-y-3">
+        <CollapsibleContent className="px-4 pb-4 pt-0 space-y-3 animate-fade-in">
           {isEditing ? (
             <div className="pl-7 space-y-2">
               <label htmlFor="edit-description" className="text-sm font-medium">
@@ -222,8 +310,15 @@ export function TodoItem({ todo }: TodoItemProps) {
           
           {/* Subtasks section */}
           <div className="pl-7 space-y-2">
-            <h4 className="text-xs font-medium text-muted-foreground mb-1">
-              {hasSubtasks ? 'Subtasks' : 'Add Subtasks'}
+            <h4 className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-1">
+              {hasSubtasks ? (
+                <>
+                  <span>Subtasks</span>
+                  <Badge variant="outline" className="text-[10px] h-4">
+                    {completedSubtasks}/{totalSubtasks}
+                  </Badge>
+                </>
+              ) : 'Add Subtasks'}
             </h4>
             {hasSubtasks && (
               <div className="space-y-1">
